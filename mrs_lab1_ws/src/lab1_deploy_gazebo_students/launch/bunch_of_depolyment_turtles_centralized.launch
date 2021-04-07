@@ -1,0 +1,15 @@
+<launch>
+
+    <arg name = "links" default="[[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]]"/>
+
+    <param name = "inter_distance_x" value="1"/>
+    <param name = "inter_distance_y" value="0"/>
+
+    <node pkg="lab1_deploy_gazebo_students" type="deployment_turtlebot_centralized.py" name="deploy" args="4 $(arg links) True"  output="screen">
+        <param name = "t_local" value = "0.5"/>
+    </node>
+
+<node pkg="lab1_deploy_gazebo_students" type="position_plotter.py" name="position_plotter" args="4"></node>
+</launch>
+
+
