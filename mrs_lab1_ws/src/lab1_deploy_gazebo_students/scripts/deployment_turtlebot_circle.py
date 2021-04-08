@@ -58,7 +58,7 @@ class Robot():
 	def request_gossip_update(self, event):
 		print("Callback triggered {} times: {}".format(self.robot_id, self.counter))
 		
-		if self.available_neightbors is not None and self.available_neightbors:
+		if self.available_neightbors is not None:
 			target_id = random.choice(self.available_neightbors)
 		else:
 			return
@@ -93,13 +93,13 @@ class Robot():
 		print("{} publish at topic_queue_position_plot".format(self.robot_id))
 		my_pos_plot=queue_position_plot()
 		my_pos_plot.robot_id=self.robot_id
-		my_pos_plot.x=self.x + np.cos(self.theta)
-		my_pos_plot.y=self.y + np.sin(self.theta)
+		my_pos_plot.x=self.x + np.cos(self.theta) * self.inter_distance
+		my_pos_plot.y=self.y + np.sin(self.theta) * self.inter_distance
 		self.pub.publish(my_pos_plot)
 
 		print("{} publish a navigation goal at topicGoToGoal_goal".format(self.robot_id)+str(self.robot_id))
 		next_pos = GoToGoal_goal()
-		next_pos.goal_coords=[self.x  + np.cos(self.theta), self.y + np.sin(self.theta)]
+		next_pos.goal_coords=[self.x  + np.cos(self.theta) * self.inter_distance, self.y + np.sin(self.theta) * self.inter_distance]
 		next_pos.goal_z=0.0 #currently, not used
 		next_pos.speed=0.0 #currently, not used
 		self.pub_goTogoal.publish(next_pos)

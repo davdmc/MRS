@@ -141,7 +141,7 @@ class LaplacianGraph:
 			self.states_y_iter = np.hstack((self.states_y_iter, next_y))
 			# Only update poses after 100 iterations
 			self.update_poses(next_x, next_y)
-			rospy.sleep(0.1)
+			rospy.sleep(self.t_local)
 			k+=1
 
 		return

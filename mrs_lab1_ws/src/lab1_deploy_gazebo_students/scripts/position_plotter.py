@@ -8,8 +8,6 @@ import sys
 from math import radians, copysign, sqrt, pow, pi, atan2
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib
-from matplotlib import animation
 matplotlib.use("TkAgg")
 import tf
 from matplotlib.animation import FuncAnimation
@@ -37,9 +35,8 @@ class Plotter():
 		rospy.sleep(0.1)# give some time to receive at least a set of robot positions.
 		self.obtain_pos = rospy.Timer(rospy.Duration(0.1), self.query_positions_timer)
 		ani = FuncAnimation(self.fig, self.act_drawing)
-		plt.show(block=True)
 
-	def act_drawing(self, event):
+	def act_drawing(self):
 		plt.clf()
 		v_x_text = self.v_robot_x * 1.01
 		v_y_text = self.v_robot_y * 1.01

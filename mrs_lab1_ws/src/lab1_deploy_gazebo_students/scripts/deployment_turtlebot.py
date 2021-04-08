@@ -57,7 +57,7 @@ class Robot():
 	def request_gossip_update(self, event):
 		print("Callback triggered {} times: {}".format(self.robot_id, self.counter))
 
-		if self.available_neightbors is not None and self.available_neightbors:
+		if self.available_neightbors is not None:
 			target_id = random.choice(self.available_neightbors)
 		else:
 			return
@@ -82,9 +82,10 @@ class Robot():
 		myResponse.avg_x=(req.x + self.x) / 2
 		myResponse.avg_y=(req.y + self.y) / 2
 		
-		self.x = myResponse.avg_x
-		self.y = myResponse.avg_y
-		self.update_pose()
+		if not self.leader:
+			self.x = myResponse.avg_x
+			self.y = myResponse.avg_y
+			self.update_pose()
 				
 		return myResponse
 

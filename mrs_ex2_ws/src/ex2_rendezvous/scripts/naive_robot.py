@@ -25,14 +25,15 @@ class NaiveRobot:
         self.gossip_update_server = rospy.Service(
             'gossip_update_'+str(self.robot_id), gossip_update, self.handle_gossip_update)
         self.position_publisher = rospy.Publisher('queue_position_plot', queue_position_plot, queue_size=10)
-        self.timer = rospy.Timer(rospy.Duration(
-            self.t_local), self.request_gossip_update)
-        rospy.sleep(0.5)
         position_update = queue_position_plot()
         position_update.x = self.position[0]
         position_update.y = self.position[1]
         position_update.robot_id = self.robot_id
+        rospy.sleep(0.5)
         self.position_publisher.publish(position_update)
+        rospy.sleep(1.5)
+        self.timer = rospy.Timer(rospy.Duration(
+            self.t_local), self.request_gossip_update)
 
     def read_parameters(self):
         try:
@@ -73,13 +74,13 @@ class NaiveRobot:
         res.x_resp = (req.x_req + self.position[0]) / 2
         res.y_resp = (req.y_req + self.position[1]) / 2
 
-        self.position[0] = res.x_resp + self.inter_distance_x * self.robot_id
-        self.position[1] = res.y_resp + self.inter_distance_y * self.robot_id
+        self.position[0] = res.x_resp
+        self.position[1] = res.y_resp
         rospy.loginfo("Position of robot {} updated: {}".format(
                 self.robot_id, self.position))
         position_update = queue_position_plot()
-        position_update.x = self.position[0]
-        position_update.y = self.position[1]
+        position_update.x = self.position[0] + self.inter_distance_x * self.robot_id
+        position_update.y = self.position[1] + self.inter_distance_y * self.robot_id
         position_update.robot_id = self.robot_id
         self.position_publisher.publish(position_update)
         return res
@@ -96,13 +97,13 @@ class NaiveRobot:
                 'gossip_update_'+str(target_id), gossip_update)
             res = service_gossip_update( self.robot_id,
                 self.position[0], self.position[1])
-            self.position[0] = res.x_resp + self.inter_distance_x * self.robot_id
-            self.position[1] = res.y_resp + self.inter_distance_y * self.robot_id
+            self.position[0] = res.x_resp 
+            self.position[1] = res.y_resp
             rospy.loginfo("Position of robot {} updated: {}".format(
                 self.robot_id, self.position))
             position_update = queue_position_plot()
-            position_update.x = self.position[0]
-            position_update.y = self.position[1]
+            position_update.x = self.position[0] + self.inter_distance_x * self.robot_id
+            position_update.y = self.position[1] + self.inter_distance_y * self.robot_id
             position_update.robot_id = self.robot_id
             self.position_publisher.publish(position_update)
         except rospy.ServiceException as e:
