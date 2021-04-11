@@ -28,6 +28,12 @@
   <!-- Robot 4 -->
   <node pkg="lab1_deploy_gazebo_students" type="goTogoal_turtlebot.py" name="$(arg fourth_tb3)_as" output="screen" args="3">  </node>
 
+  <!-- Robot 5 -->
+  <node pkg="lab1_deploy_gazebo_students" type="goTogoal_turtlebot.py" name="$(arg fifth_tb3)_as" output="screen" args="4">  </node>
+
+  <!-- Robot 4 -->
+  <node pkg="lab1_deploy_gazebo_students" type="goTogoal_turtlebot.py" name="$(arg sixth_tb3)_as" output="screen" args="5">  </node>
+
 </launch>
 
 

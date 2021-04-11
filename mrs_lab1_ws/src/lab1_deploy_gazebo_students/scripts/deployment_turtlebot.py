@@ -55,9 +55,8 @@ class Robot():
 		rospy.spin()
 		
 	def request_gossip_update(self, event):
-		print("Callback triggered {} times: {}".format(self.robot_id, self.counter))
 
-		if self.available_neightbors is not None:
+		if self.available_neightbors and self.available_neightbors is not None:
 			target_id = random.choice(self.available_neightbors)
 		else:
 			return

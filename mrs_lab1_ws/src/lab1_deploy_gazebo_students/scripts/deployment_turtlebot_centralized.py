@@ -91,7 +91,8 @@ class LaplacianGraph:
 
 	def obtain_weights(self, alpha=0.01, verbose=False):
 		# Compute degree matrix:
-		self.degree_matrix = np.diag(self.graph_E.sum(axis=0))
+		 # It is important that it axis=1 for leader-follower strategy!
+		self.degree_matrix = np.diag(self.graph_E.sum(axis=1))
 		if verbose:
 			print("Degree matrix: \n" , self.degree_matrix)
 			print("----------------------------------------")
