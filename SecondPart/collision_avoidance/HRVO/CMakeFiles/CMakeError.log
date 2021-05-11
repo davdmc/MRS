@@ -1,0 +1,63 @@
+Performing C++ SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /media/Data/David/Unizar/MRS/collision_avoidance/HRVO/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_783d6/fast && /usr/bin/make -f CMakeFiles/cmTC_783d6.dir/build.make CMakeFiles/cmTC_783d6.dir/build
+make[1]: Entering directory '/home/david/git/HRVO/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_783d6.dir/src.cxx.o
+/usr/bin/c++    -Wall -Wformat-security -Werror=format-security -Wno-unused -DCMAKE_HAVE_LIBC_PTHREAD -fPIE   -std=c++98 -o CMakeFiles/cmTC_783d6.dir/src.cxx.o -c /media/Data/David/Unizar/MRS/collision_avoidance/HRVO/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_783d6
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_783d6.dir/link.txt --verbose=1
+/usr/bin/c++   -Wall -Wformat-security -Werror=format-security -Wno-unused -DCMAKE_HAVE_LIBC_PTHREAD   -Wl,--as-needed  CMakeFiles/cmTC_783d6.dir/src.cxx.o  -o cmTC_783d6 
+CMakeFiles/cmTC_783d6.dir/src.cxx.o: In function `main':
+src.cxx:(.text+0x3e): undefined reference to `pthread_create'
+src.cxx:(.text+0x4a): undefined reference to `pthread_detach'
+src.cxx:(.text+0x5b): undefined reference to `pthread_join'
+src.cxx:(.text+0x6f): undefined reference to `pthread_atfork'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_783d6.dir/build.make:86: recipe for target 'cmTC_783d6' failed
+make[1]: *** [cmTC_783d6] Error 1
+make[1]: Leaving directory '/home/david/git/HRVO/CMakeFiles/CMakeTmp'
+Makefile:121: recipe for target 'cmTC_783d6/fast' failed
+make: *** [cmTC_783d6/fast] Error 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /media/Data/David/Unizar/MRS/collision_avoidance/HRVO/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_dab7d/fast && /usr/bin/make -f CMakeFiles/cmTC_dab7d.dir/build.make CMakeFiles/cmTC_dab7d.dir/build
+make[1]: Entering directory '/home/david/git/HRVO/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_dab7d.dir/CheckFunctionExists.cxx.o
+/usr/bin/c++    -Wall -Wformat-security -Werror=format-security -Wno-unused -DCHECK_FUNCTION_EXISTS=pthread_create -fPIE   -std=c++98 -o CMakeFiles/cmTC_dab7d.dir/CheckFunctionExists.cxx.o -c /media/Data/David/Unizar/MRS/collision_avoidance/HRVO/CMakeFiles/CheckLibraryExists/CheckFunctionExists.cxx
+Linking CXX executable cmTC_dab7d
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_dab7d.dir/link.txt --verbose=1
+/usr/bin/c++   -Wall -Wformat-security -Werror=format-security -Wno-unused -DCHECK_FUNCTION_EXISTS=pthread_create   -Wl,--as-needed  CMakeFiles/cmTC_dab7d.dir/CheckFunctionExists.cxx.o  -o cmTC_dab7d  -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_dab7d.dir/build.make:86: recipe for target 'cmTC_dab7d' failed
+make[1]: *** [cmTC_dab7d] Error 1
+make[1]: Leaving directory '/home/david/git/HRVO/CMakeFiles/CMakeTmp'
+Makefile:121: recipe for target 'cmTC_dab7d/fast' failed
+make: *** [cmTC_dab7d/fast] Error 2
+
+
+
