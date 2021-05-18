@@ -45,13 +45,13 @@ unset(_expectedTargets)
 add_library(HRVO::HRVO SHARED IMPORTED)
 
 set_target_properties(HRVO::HRVO PROPERTIES
-  INTERFACE_INCLUDE_DIRECTORIES "/media/Data/David/Unizar/MRS/collision_avoidance/HRVO/src;/media/Data/David/Unizar/MRS/collision_avoidance/HRVO/src"
+  INTERFACE_INCLUDE_DIRECTORIES "/home/diego/Documentos/master/MRS/git/MRS/SecondPart/collision_avoidance/HRVO/src;/home/diego/Documentos/master/MRS/git/MRS/SecondPart/collision_avoidance/HRVO/src"
 )
 
 # Import target "HRVO::HRVO" for configuration "Release"
 set_property(TARGET HRVO::HRVO APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties(HRVO::HRVO PROPERTIES
-  IMPORTED_LOCATION_RELEASE "/media/Data/David/Unizar/MRS/collision_avoidance/HRVO/src/libHRVO.so.1.1.0"
+  IMPORTED_LOCATION_RELEASE "/home/diego/Documentos/master/MRS/git/MRS/SecondPart/collision_avoidance/HRVO/src/libHRVO.so.1.1.0"
   IMPORTED_SONAME_RELEASE "libHRVO.so.1"
   )
 

@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/Circle.dir/Circle.cpp.o"
-  "Circle"
   "Circle.pdb"
+  "Circle"
 )
 
 # Per-language clean rules from dependency scanning.

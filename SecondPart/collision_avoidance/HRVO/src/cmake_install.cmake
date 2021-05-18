@@ -1,4 +1,4 @@
-# Install script for directory: /media/Data/David/Unizar/MRS/collision_avoidance/HRVO/src
+# Install script for directory: /home/diego/Documentos/master/MRS/git/MRS/SecondPart/collision_avoidance/HRVO/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -41,6 +41,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xruntimex" OR NOT CMAKE_INSTALL_COMP
   foreach(file
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/libHRVO.so.1.1.0"
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/libHRVO.so.1"
+      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/libHRVO.so"
       )
     if(EXISTS "${file}" AND
        NOT IS_SYMLINK "${file}")
@@ -50,12 +51,14 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xruntimex" OR NOT CMAKE_INSTALL_COMP
     endif()
   endforeach()
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE SHARED_LIBRARY FILES
-    "/media/Data/David/Unizar/MRS/collision_avoidance/HRVO/src/libHRVO.so.1.1.0"
-    "/media/Data/David/Unizar/MRS/collision_avoidance/HRVO/src/libHRVO.so.1"
+    "/home/diego/Documentos/master/MRS/git/MRS/SecondPart/collision_avoidance/HRVO/src/libHRVO.so.1.1.0"
+    "/home/diego/Documentos/master/MRS/git/MRS/SecondPart/collision_avoidance/HRVO/src/libHRVO.so.1"
+    "/home/diego/Documentos/master/MRS/git/MRS/SecondPart/collision_avoidance/HRVO/src/libHRVO.so"
     )
   foreach(file
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/libHRVO.so.1.1.0"
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/libHRVO.so.1"
+      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/libHRVO.so"
       )
     if(EXISTS "${file}" AND
        NOT IS_SYMLINK "${file}")
@@ -67,38 +70,22 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xruntimex" OR NOT CMAKE_INSTALL_COMP
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xdevelopmentx" OR NOT CMAKE_INSTALL_COMPONENT)
-  if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/libHRVO.so" AND
-     NOT IS_SYMLINK "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/libHRVO.so")
-    file(RPATH_CHECK
-         FILE "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/libHRVO.so"
-         RPATH "")
-  endif()
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE SHARED_LIBRARY FILES "/media/Data/David/Unizar/MRS/collision_avoidance/HRVO/src/libHRVO.so")
-  if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/libHRVO.so" AND
-     NOT IS_SYMLINK "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/libHRVO.so")
-    if(CMAKE_INSTALL_DO_STRIP)
-      execute_process(COMMAND "/usr/bin/strip" "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/libHRVO.so")
-    endif()
-  endif()
-endif()
-
-if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xdevelopmentx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include/HRVO" TYPE FILE FILES
-    "/media/Data/David/Unizar/MRS/collision_avoidance/HRVO/src/HRVO.h"
-    "/media/Data/David/Unizar/MRS/collision_avoidance/HRVO/src/Simulator.h"
-    "/media/Data/David/Unizar/MRS/collision_avoidance/HRVO/src/Vector2.h"
+    "/home/diego/Documentos/master/MRS/git/MRS/SecondPart/collision_avoidance/HRVO/src/HRVO.h"
+    "/home/diego/Documentos/master/MRS/git/MRS/SecondPart/collision_avoidance/HRVO/src/Simulator.h"
+    "/home/diego/Documentos/master/MRS/git/MRS/SecondPart/collision_avoidance/HRVO/src/Vector2.h"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xdevelopmentx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include/HRVO" TYPE FILE FILES "/media/Data/David/Unizar/MRS/collision_avoidance/HRVO/src/Export.h")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include/HRVO" TYPE FILE FILES "/home/diego/Documentos/master/MRS/git/MRS/SecondPart/collision_avoidance/HRVO/src/Export.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xdevelopmentx" OR NOT CMAKE_INSTALL_COMPONENT)
   if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/cmake/HRVO/HRVOTargets.cmake")
     file(DIFFERENT EXPORT_FILE_CHANGED FILES
          "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/cmake/HRVO/HRVOTargets.cmake"
-         "/media/Data/David/Unizar/MRS/collision_avoidance/HRVO/src/CMakeFiles/Export/lib/cmake/HRVO/HRVOTargets.cmake")
+         "/home/diego/Documentos/master/MRS/git/MRS/SecondPart/collision_avoidance/HRVO/src/CMakeFiles/Export/lib/cmake/HRVO/HRVOTargets.cmake")
     if(EXPORT_FILE_CHANGED)
       file(GLOB OLD_CONFIG_FILES "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/cmake/HRVO/HRVOTargets-*.cmake")
       if(OLD_CONFIG_FILES)
@@ -107,9 +94,9 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xdevelopmentx" OR NOT CMAKE_INSTALL_
       endif()
     endif()
   endif()
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/HRVO" TYPE FILE FILES "/media/Data/David/Unizar/MRS/collision_avoidance/HRVO/src/CMakeFiles/Export/lib/cmake/HRVO/HRVOTargets.cmake")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/HRVO" TYPE FILE FILES "/home/diego/Documentos/master/MRS/git/MRS/SecondPart/collision_avoidance/HRVO/src/CMakeFiles/Export/lib/cmake/HRVO/HRVOTargets.cmake")
   if("${CMAKE_INSTALL_CONFIG_NAME}" MATCHES "^([Rr][Ee][Ll][Ee][Aa][Ss][Ee])$")
-    file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/HRVO" TYPE FILE FILES "/media/Data/David/Unizar/MRS/collision_avoidance/HRVO/src/CMakeFiles/Export/lib/cmake/HRVO/HRVOTargets-release.cmake")
+    file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/HRVO" TYPE FILE FILES "/home/diego/Documentos/master/MRS/git/MRS/SecondPart/collision_avoidance/HRVO/src/CMakeFiles/Export/lib/cmake/HRVO/HRVOTargets-release.cmake")
   endif()
 endif()
 

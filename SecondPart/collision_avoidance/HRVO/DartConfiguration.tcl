@@ -4,14 +4,14 @@
 
 
 # Configuration directories and files
-SourceDirectory: /media/Data/David/Unizar/MRS/collision_avoidance/HRVO
-BuildDirectory: /media/Data/David/Unizar/MRS/collision_avoidance/HRVO
+SourceDirectory: /home/diego/Documentos/master/MRS/git/MRS/SecondPart/collision_avoidance/HRVO
+BuildDirectory: /home/diego/Documentos/master/MRS/git/MRS/SecondPart/collision_avoidance/HRVO
 
 # Where to place the cost data store
 CostDataFile: 
 
 # Site is something like machine.domain, i.e. pragmatic.crd
-Site: david-msi
+Site: diego-GF75-Thin-10UE
 
 # Build name is osname-revision-compiler, i.e. Linux-2.4.2-2smp-c++
 BuildName: Linux-c++
@@ -20,14 +20,24 @@ BuildName: Linux-c++
 LabelsForSubprojects: 
 
 # Submission information
-SubmitURL: https://my.cdash.org/submit.php?project=HRVO
+IsCDash: ON
+CDashVersion: 
+QueryCDashVersion: 
+DropSite: my.cdash.org
+DropLocation: /submit.php?project=HRVO
+DropSiteUser: 
+DropSitePassword: 
+DropSiteMode: 
+DropMethod: https
+TriggerSite: 
+ScpCommand: /usr/bin/scp
 
 # Dashboard start time
 NightlyStartTime: 01:00:00 UTC
 
 # Commands for the build/test/submit cycle
-ConfigureCommand: "/usr/local/bin/cmake" "/media/Data/David/Unizar/MRS/collision_avoidance/HRVO"
-MakeCommand: /usr/local/bin/cmake --build . --config "${CTEST_CONFIGURATION_TYPE}"
+ConfigureCommand: "/usr/bin/cmake" "/home/diego/Documentos/master/MRS/git/MRS/SecondPart/collision_avoidance/HRVO"
+MakeCommand: /usr/bin/cmake --build . --config "${CTEST_CONFIGURATION_TYPE}"
 DefaultCTestConfigurationType: Release
 
 # version control
@@ -57,9 +67,9 @@ P4UpdateOptions:
 P4UpdateCustom: 
 
 # Generic update command
-UpdateCommand: /usr/bin/git
+UpdateCommand: 
 UpdateOptions: 
-UpdateType: git
+UpdateType: 
 
 # Compiler info
 Compiler: /usr/bin/c++

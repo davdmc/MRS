@@ -1,4 +1,4 @@
-# Install script for directory: /media/Data/David/Unizar/MRS/collision_avoidance/HRVO/doc
+# Install script for directory: /home/diego/Documentos/master/MRS/git/MRS/SecondPart/collision_avoidance/HRVO/doc
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

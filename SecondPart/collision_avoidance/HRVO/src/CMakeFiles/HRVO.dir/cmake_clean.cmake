@@ -5,9 +5,9 @@ file(REMOVE_RECURSE
   "CMakeFiles/HRVO.dir/Simulator.cpp.o"
   "CMakeFiles/HRVO.dir/Vector2.cpp.o"
   "libHRVO.pdb"
+  "libHRVO.so.1.1.0"
   "libHRVO.so"
   "libHRVO.so.1"
-  "libHRVO.so.1.1.0"
 )
 
 # Per-language clean rules from dependency scanning.

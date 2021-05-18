@@ -38,6 +38,7 @@ if(BUILD_TESTING)
   include_directories( ${OpenCV_INCLUDE_DIRS} )
   
   add_executable(Circle Circle.cpp)
+  add_executable(D D.cpp)
 
   option(OUTPUT_TIME_AND_POSITIONS "Output time and positions" ON)
 
@@ -50,6 +51,10 @@ if(BUILD_TESTING)
   target_compile_definitions(Circle PRIVATE
     ${HRVO_EXAMPLES_COMPILE_DEFINITIONS})
   target_link_libraries(Circle PRIVATE ${HRVO_LIBRARY} ${OpenCV_LIBS})
+
+  target_compile_definitions(D PRIVATE
+    ${HRVO_EXAMPLES_COMPILE_DEFINITIONS})
+  target_link_libraries(D PRIVATE ${HRVO_LIBRARY} ${OpenCV_LIBS})
 
   if(ENABLE_INTERPROCEDURAL_OPTIMIZATION
       AND HRVO_INTERPROCEDURAL_OPTIMIZATION_SUPPORTED)
