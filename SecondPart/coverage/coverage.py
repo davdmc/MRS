@@ -83,7 +83,7 @@ class Environment:
 if __name__ == '__main__':
 
     # my_environment = Environment([100,100], 1, -1/200, 1/400, 120000, 1)
-    my_environment = Environment([100,100], 1, -1/200, 1/400, 120000, 1/2)
+    my_environment = Environment([100,100], 1, -1/200, 1/100, 120000, 2)
 
 
     end_k = 804

@@ -166,7 +166,7 @@ class Environment:
 
 if __name__ == '__main__':
 
-    my_environment = Environment([50,50], 1, -1/200, 1/400, 150000, 1)
+    my_environment = Environment([50,50], 1, -1/200, 1/100, 150000, 1)
     # my_environment = Environment([100,100], 0.01, -0.5, 0.00005, 12, 0.5)
 
 
