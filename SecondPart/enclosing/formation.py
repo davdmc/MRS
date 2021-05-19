@@ -19,7 +19,7 @@ def imscatter(x, y, image, ax=None, zoom=1):
         artists.append(ax.add_artist(ab))
     return artists
 
-class Enclosing:
+class Formation:
     def __init__(self, qi_x, qi_y, ci_x, ci_y, plot_results=False):
         self.lock = threading.Lock()
 
@@ -36,12 +36,11 @@ class Enclosing:
         self.ci = np.array([ci_x,ci_y]).T
 
         # Simulation params
-        self.iters = 300
-        self.K_c = 10
+        self.iters = 100
+        self.K_c = 5
         self.delta_t = 0.01
         self.random_x = 1
         self.random_y = 1
-
 
         # Gather information to plot results
         self.plot_results = plot_results
@@ -63,21 +62,14 @@ class Enclosing:
             d = np.sign(np.linalg.det(V_t.T @ U.T))
             D = np.array([[1,0],[0,d]])
             R = V_t.T @ D @ U.T
-            # Notice the - sign!
-            q_Ni = -Q[self.num_pos-1::self.num_pos]
-            c_Ni = -C[self.num_pos-1::self.num_pos]
-            #print("Shapes:\nQ: {}\nC: {}\nA: {}\nR: {}\nq_Ni: {}\nc_Ni: {}".format(Q.shape, C.shape, A.shape, R.shape, q_Ni.shape, c_Ni.shape))
-            
+
             # Compute control
             q_dot = np.zeros((self.num_pos, 2))
             for agent in range(self.num_pos):
-                q_dot[agent,:] = self.K_c * (q_Ni[agent,:] - R @ c_Ni[agent,:])
-            
-            # Random movement of the prey
-            if np.random.uniform(0,1) > 0.95:
-                self.random_x = np.random.uniform(-5,5)
-                self.random_y = np.random.uniform(-5,5)
-            q_dot[self.num_pos-1, :] += [self.random_x, self.random_y]
+                #Notice the - sign!
+                q_ji = -np.sum(Q[agent * self.num_pos:(agent+1) * self.num_pos-1, :],axis=0)
+                c_ji = -np.sum(C[agent * self.num_pos:(agent+1) * self.num_pos-1, :],axis=0)
+                q_dot[agent,:] = self.K_c * (q_ji - R @ c_ji)
 
             # Apply control
             self.qi += q_dot * self.delta_t
@@ -85,6 +77,7 @@ class Enclosing:
             self.record_x[:,iteration] = self.qi[:,0]
             self.record_y[:,iteration] = self.qi[:,1]
 
+            #print(self.qi)
             self.plot_robots()
 
         if self.plot_results:
@@ -102,7 +95,7 @@ class Enclosing:
             for iter_record in range(self.num_pos):
                 plt.plot(x_axis, self.record_y[iter_record,:])
             plt.legend(['Hunter 1', 'Hunter 2', 'Hunter 3', 'Hunter 4', 'Prey'])
-
+            
             plt.draw()
             print("Close windows to finish...")
             plt.show(block=True)
@@ -115,7 +108,6 @@ class Enclosing:
         # Compute inter-robot relative positions
         for i in range(self.num_pos):
             for j in range(self.num_pos):
-                #print("Position {} with {}".format(i,j))
                 rel_pos[i + self.num_pos*j, 0] = positions[j,0] - positions[i,0]
                 rel_pos[i + self.num_pos*j, 1] = positions[j,1] - positions[i,1]
         return rel_pos
@@ -124,12 +116,11 @@ class Enclosing:
         plt.clf()
         plt.xlim(-10,10)
         plt.ylim(-10,10)
-        for i in range(self.num_pos-1):
+        for i in range(self.num_pos):
                 #plt.plot(self.qi[i,0],self.qi[i,1],'bo')
                 imscatter(self.qi[i,0],self.qi[i,1],self.dog,zoom=0.05)
 
         #plt.plot(self.qi[self.num_pos-1,0],self.qi[self.num_pos-1,1],'ro')
-        imscatter(self.qi[self.num_pos-1,0],self.qi[self.num_pos-1,1],self.sheep,zoom=0.025)
 
         plt.draw()
         plt.pause(0.01)
@@ -138,8 +129,14 @@ if __name__ == "__main__":
 
     qx = [-6.1,8.7,-4.7, 3.9, 1]
     qy = [-4,-4.4,4.2, 4.5, 1]
-    #cx = [2,-2,0,0,0]
-    #cy = [0,0,2,-2,0]
-    cx = [0,2,-2,0,0]
-    cy = [2,-2,-2,-2,0]
-    enc = Enclosing(qx,qy,cx,cy, True)
+    cx = []
+    cy = []
+    radius = 5
+    angle = 72
+    angles = np.arange(0,360,angle) * 2 * np.pi / 360
+    print(angles)
+    for a in angles:
+        cx.append(np.cos(a) * radius)
+        cy.append(np.sin(a) * radius)
+
+    enc = Formation(qx,qy,cx,cy, True)
