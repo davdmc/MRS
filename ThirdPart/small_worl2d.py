@@ -809,7 +809,7 @@ class Voronoid(Soul):
         npos=[]
         for n in neigh:
             npos.append((n.pos.x,n.pos.y))
-        self.W = self.Q & voronoi(bpos,npos,self.r)
+        self.W = self.Q & voronoi(bpos,npos,self.r/2)
         self.vertices=list(self.W.exterior.coords) # soul represented by the destination Voronoi cell
         self.GoTo.cmd_set(self.W.centroid,self.T)
         self.d=Point(bpos).distance(self.W.centroid)/self.r

@@ -3,7 +3,7 @@
 ## Author: Enrique Teruel (ET) eteruel@unizar.es
 ## License: CC-BY-SA
 
-from time import time_ns, time, localtime, strftime
+from time import time, localtime, strftime
 from random import uniform
 import numpy as np
 from matplotlib.animation import FFMpegWriter # requires having ffmpeg installed, from https://ffmpeg.org/

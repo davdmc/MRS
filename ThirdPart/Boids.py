@@ -20,7 +20,7 @@ class Boid(Soul):
     def update(self):
         b=self.body
         i=self.space.bodindex(b.name)
-        # YOUR BOID UDATE CODE
+        # YOUR BOID UPDATE CODE
         super().update()
 
 ## MAIN

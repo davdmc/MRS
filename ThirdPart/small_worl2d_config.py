@@ -21,8 +21,8 @@ os.chdir(working_dir) # for files
 loginfo=True # True for debugging
 logerror=True
 visual=True 
-shoul=False # to show Soul's or not (graphically)
-showconn=False # to show the graph of connections
+shoul=True # to show Soul's or not (graphically)
+showconn=True # to show the graph of connections
 
 ## Window sizing; default aspect ratio W:H; coords (-W:W,-H:H); 
 SS=15 # Screen Size SS in ches
