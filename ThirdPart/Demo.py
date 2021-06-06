@@ -3,7 +3,7 @@
 ## Author: Enrique Teruel (ET) eteruel@unizar.es
 ## License: CC-BY-SA
 
-from time import time_ns, time, localtime, strftime
+from time import time, localtime, strftime
 from random import uniform
 import numpy as np
 from matplotlib.animation import FFMpegWriter # requires having ffmpeg installed, from https://ffmpeg.org/
@@ -58,7 +58,7 @@ name='Demo'+strftime("%Y%m%d%H%M", localtime())
 s=Space(name,T=RT,limits='')
 p=KPIdata(name,2,TS)
 # a big nest in the second quadrant:
-bignest=Nest('BigNest',pos=(uniform(-0.8*W,-0.2*W),uniform(0.4*H,0.6*H)),area=0.04) # 
+bignest=Nest('BigNest',pos=(uniform(-0.8*W,-0.2*W),uniform(0.4*H,0.6*H)),area=2) # 
 s.bodies.append(bignest)
 N=100
 s.spawn_bodies(nm=N)

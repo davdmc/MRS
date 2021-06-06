@@ -21,6 +21,9 @@ class Boid(Soul):
         b=self.body
         i=self.space.bodindex(b.name)
         # YOUR BOID UDATE CODE
+        # for other_b in self.space.bodies:
+        #     if isinstance(b,MoBody):
+                
         super().update()
 
 ## MAIN

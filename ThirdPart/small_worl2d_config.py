@@ -14,7 +14,7 @@ from numpy import pi
 # Random seed for reproducibility
 seed(0)
 # Working_dir
-working_dir = str(Path.home())+'\codET\working_dir'
+working_dir = str(Path.home())+'/Documentos/master/MRS/git/MRS/ThirdPart/output'
 os.chdir(working_dir) # for files
 
 ## To info or not to info
