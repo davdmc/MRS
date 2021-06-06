@@ -6,3 +6,4 @@ logs
 *Deliverables*
 *.kdenlive
 report/
+__pycache__
