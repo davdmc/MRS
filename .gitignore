@@ -5,5 +5,8 @@ logs
 *.png
 *Deliverables*
 *.kdenlive
+*.mp4
+*.pdf
+*.dat
 report/
 __pycache__
