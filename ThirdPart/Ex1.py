@@ -149,7 +149,8 @@ class Demo(Soul):
             self.current_quadrant = self.goToNestSelection()
             print("quadrant selected to go: ", self.current_quadrant)
         elif self.body.knows.tell_state()=='GoToNest':
-            if uniform(0,1) < self.cicles_time/50000:
+            self.GoTo.nw = "wander"
+            if uniform(0,1) < self.cicles_time/70000:
                 self.GoTo.nw = "wander"
                 self.body.knows.set_state('GoToNest')
                 if self.body.knows.tell_nests()[0] == self.current_quadrant:
@@ -194,7 +195,7 @@ class Demo(Soul):
                         self.current_quadrant = self.body.knows.tell_nests()[0]
                     self.cicles_time = 0
             else: #robot is in the expected biggest nest
-                if uniform(0,1) < self.cicles_time/(1+50000*max(self.body.knows.tell_nests()[1], self.body.knows.tell_nests()[3])*len(self.space.nearby(i,self.r,self.rng,type(self.body)))):
+                if uniform(0,1) < self.cicles_time/(1+10000*max(self.body.knows.tell_nests()[1], self.body.knows.tell_nests()[3])*(len(self.space.nearby(i,self.r,self.rng,type(self.body)))+1)):
                     self.GoTo.nw = "wander"
                     self.body.knows.set_state('GoToNest')
                     if self.body.knows.tell_nests()[0] == self.current_quadrant:
@@ -222,6 +223,7 @@ class Demo(Soul):
                     self.GoTo.cmd_set(self.space.nearestpoint(i,nest)) 
         elif self.body.knows.tell_state()=='OtherQuadrant':
             self.body.fc = 'c'
+            self.cicles_time = 0
             neigh=self.space.nearby(i,self.r,self.rng,type(self.body))
             for n in neigh:
                 nests = n.knows.tell_nests()
@@ -250,9 +252,10 @@ class Demo(Soul):
 name='Ex1'+strftime("%Y%m%d%H%M", localtime())
 s=Space(name,T=RT,limits='')
 p=KPIdata(name,2,TS)
+state_kpi = []
 # a big nest in the second quadrant:
-bignest=Nest('BigNest',pos=(uniform(-0.8*W,-0.2*W),uniform(0.4*H,0.6*H)),area=0.04) # 
-smallnest=Nest('SmallNest',pos=(uniform(0.8*W,0.2*W),uniform(-0.4*H,-0.6*H)),area=0.02) 
+bignest=Nest('BigNest',pos=(uniform(-0.8*W,-0.2*W),uniform(0.4*H,0.6*H)),area=6) # 
+smallnest=Nest('SmallNest',pos=(uniform(0.8*W,0.2*W),uniform(-0.4*H,-0.6*H)),area=2) 
 s.bodies.append(bignest)
 s.bodies.append(smallnest)
 N=100
@@ -260,8 +263,9 @@ s.spawn_bodies(nm=N)
 for b in s.bodies:
     if isinstance(b,Mobot):
         b.cmd_vel(v=b.v_max/2)
-        Demo(b,s,TS/10,r=2,rng=np.pi/2) # a new Soul for b (who assigns new Knowledge too)
+        Demo(b,s,TS/10,r=2,rng=np.pi) # a new Soul for b (who assigns new Knowledge too)
 KPI=[0,1] # [ fraction of live mobots who know ThereAreNests , fraction of initial robots still alive ]
+STATES = [0,0,0,0,0,0]
 end=False
 while not end:
     for b in s.bodies:
@@ -274,15 +278,31 @@ while not end:
         s.redraw()
     if time()>p.t0+(p.updates+1)*p.T:
         KPI=[0,0]
+        STATES = [0,0,0,0,0,0]
         for b in s.bodies:
             if isinstance(b,Mobot):
                 KPI[1] += 1
                 if b.knows.tell_state()=='RestInNest' and b.pos.x < 0 and b.pos.y > 0:
                     KPI[0] += 1
+                if b.knows.tell_state() == 'KnowNothing':
+                    STATES[0] += 1
+                elif b.knows.tell_state() == 'KnowOneNest':
+                    STATES[1] += 1
+                elif b.knows.tell_state() == 'KnowTwoNest':
+                    STATES[2] += 1
+                elif b.knows.tell_state() == 'GoToNest':
+                    STATES[3] += 1
+                elif b.knows.tell_state() == 'RestInNest':
+                    STATES[4] += 1
+                elif b.knows.tell_state() == 'OtherQuadrant':
+                    STATES[5] += 1
         KPI[0] /= KPI[1]
         KPI[1] /= N
         p.update(KPI)
+        STATES = np.array(STATES)/N
+        state_kpi.append(STATES)
     end=s.has_been_closed() or KPI[0]>0.9 or KPI[1]<0.1 
+    np.save("states.npy", np.array(state_kpi))
 else:
     s.close()
     p.close()
