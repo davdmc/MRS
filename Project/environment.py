@@ -2,15 +2,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from numpy import random
+from numpy.core.numeric import Inf
 from numpy.linalg.linalg import det
 
 class q_class:
-    def __init__(self, p, sigma, id, t):
+    def __init__(self, p, sigma, id, t, u):
         self.p = p
         self.sigma = sigma
         self.id = id
         self.t = t
         self.cost = 0
+        self.u = u
 
     def update_cost(self, previous_cost):
         self.cost = previous_cost + np.linalg.det(self.sigma)
@@ -36,9 +38,13 @@ class Environment:
         self.hist_xi = []
 
         self.id_nodes_graph = 0
-        self.delta = 0.0000018 #proposed by the paper
         self.sigma_estimated = []
         self.x_estimated = []
+        self.u_path = []
+
+        # PARAMETERS TO TUNE
+        self.N_sampling = 10
+        self.delta = 0.0000018 #proposed by the paper
 
         if visualize:
             # Configure plot
@@ -49,6 +55,8 @@ class Environment:
     def add_agent(self, x, y, sigma_x, sigma_y):
         self.qi = np.vstack((self.qi, np.array([x,y])))
         self.u_agents = np.vstack((self.u_agents, np.array([0,0])))
+        for i in range(len(self.u_path)):
+            self.u_path[i] = np.vstack((self.u_path[i], np.array([0,0])))
         self.sigma_agents = np.vstack((self.sigma_agents, np.array([sigma_x, sigma_y])))
         self.n_agents += 1
     
@@ -88,6 +96,10 @@ class Environment:
 
     def update(self):
         self.hist_qi.append(self.qi)
+        if (len(self.u_path) == 0):
+            self.u_path = self.sampling_based_active_information_acquisition()
+        self.set_agents_command(self.u_path[0])
+        self.u_path[0].pop(0)
         noise_agents = np.random.randn(self.qi.shape[0], self.qi.shape[1]) * self.sigma_agents
         self.qi += self.u_agents * self.t + noise_agents
     
@@ -135,12 +147,48 @@ class Environment:
         # In the approach of the paper, where robots have a limited sensor range,
         # the approach taken is to bring each robot closer to each target until
         # they may sense the target. In our case, this "cheat" is not needed, as we
-        # use an infinite sensor range, and the preferred final u will be always selected
+        # use an infinite sensor range, and the np.size(V[i])preferred final u will be always selected
         # using the covariance of the measurements. Thus, the sampling of u is completely
         # random.
         u_possibilities = [0, 0.5, -0.5]
         return random.choice(u_possibilities, (np.shape(self.u_agents)))
 
+    def same_configuration(self, q, V):
+        k = -1
+        found = False
+        for i in range(len(V)):
+            equal = True
+            for j in range(np.size(q.p)):
+                if q.p[j] != V[i][0].p[j]:
+                    equal = False
+            if equal:
+                found = True
+                k = i
+        return found, k
+
+    def find_recover_path(self, X, V, epsilon):
+        lowest_cost = float("inf")
+        lowest_id = -1
+        for q in X:
+            if q.cost < lowest_cost:
+                lowest_cost = q.cost
+                lowest_id = q.id
+        finished = False
+        path_q = [lowest_id]
+        while not finished:
+            for [parent, child] in epsilon:
+                if child == lowest_id and V[parent].t == 0:
+                    finished = True
+                    break
+                elif child == lowest_id:
+                    lowest_id = parent
+                    path_q.append(parent)
+                    break
+        path_q.reverse()
+        u = []
+        for q in path_q:
+            u.append(q.u)
+        return u
 
 
     def sampling_based_active_information_acquisition(self):
@@ -154,14 +202,15 @@ class Environment:
         # V: nodes of the tree. Each node is q(t) = [p(t), sigma(t)]
         # epsilon: edges of the tree
         # Xg: set of states that collects all states
-        q_0 = q_class(self.qi, self.sigma_estimated, self.id_nodes_graph, q_rand.t + 1)
+        q_0 = q_class(self.qi, self.sigma_estimated, self.id_nodes_graph, 0, np.zeros(np.shape(self.u_agents)))
+        self.id_nodes_graph = self.id_nodes_graph+1
         q_0.update_cost(0)
-        V_total = [q_0]
+        V_total = {q_0.id: q_0}
         Vk = [[q_0]]
         epsilon = []
         K = 0
         Xg = []
-        N = 10
+        N = self.N_sampling
         max_t = 0
         for n in range(N):
             Vkrand = self.sample_fv(Vk, max_t)
@@ -170,19 +219,21 @@ class Environment:
             if self.free_space(p_new):
                 for q_rand in Vk[Vkrand]:
                     x, sigma_new = self.apply_kalman_filter(q_rand.p, q_rand.sigma)
-                    q_new = q_class(p_new, sigma_new, self.id_nodes_graph, q_rand.t + 1)
+                    q_new = q_class(p_new, sigma_new, self.id_nodes_graph, q_rand.t + 1, u_new)
                     self.id_nodes_graph = self.id_nodes_graph+1
                     q_new.update_cost(q_rand.cost)
                     max_t = max(max_t, q_new.t)
-                    V_total.append(q_new)
+                    V_total[q_new.id] = q_new
                     epsilon.append([q_rand.id, q_new.id])
-                    if same_configuration(q_new, Vk):
-                        Vk[Vkrand].append(q_new)
+                    exists, k = self.same_configuration(q_new, Vk)
+                    if exists:
+                        Vk[k].append(q_new)
                     else:
                         K = K+1
                         Vk.append([q_new])
                     if np.linalg.det(q_new.sigma) <= self.delta:
                         Xg.append(q_new)
-        path = find_recover_path(q_end)
+        path = self.find_recover_path(Xg, V_total, epsilon)
+        return path
 
 
