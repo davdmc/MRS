@@ -44,7 +44,7 @@ class Environment:
 
         # PARAMETERS TO TUNE
         self.N_sampling = 10
-        self.delta = 0.0000018 #proposed by the paper
+        self.delta = 0.18 #proposed by the paper
 
         if visualize:
             # Configure plot
@@ -83,7 +83,7 @@ class Environment:
         x = self.x_estimated
         for agent in range(self.n_agents):
             measurements_sigma = np.identity(self.n_targets*2)
-            measurements_x = np.zeros(self.n_targets*2, 1)
+            measurements_x = np.zeros((self.n_targets*2, 1))
             for target in range(self.n_targets):
                 difx = pos_q[agent, 0] - self.xi[target, 0]
                 dify = pos_q[agent, 1] - self.xi[target, 1]
@@ -100,10 +100,11 @@ class Environment:
 
     def update(self):
         self.hist_qi.append(self.qi)
-        if (len(self.u_path) == 0):
-            self.u_path = self.sampling_based_active_information_acquisition()
-        self.set_agents_command(self.u_path[0])
-        self.u_path[0].pop(0)
+        if self.n_agents > 0:
+            if (len(self.u_path) == 0):
+                self.u_path = self.sampling_based_active_information_acquisition()
+            self.set_agents_command(self.u_path[0])
+            self.u_path.pop(0)
         noise_agents = np.random.randn(self.qi.shape[0], self.qi.shape[1]) * self.sigma_agents
         self.qi += self.u_agents * self.t + noise_agents
     
@@ -154,7 +155,7 @@ class Environment:
         # use an infinite sensor range, and the np.size(V[i])preferred final u will be always selected
         # using the covariance of the measurements. Thus, the sampling of u is completely
         # random.
-        u_possibilities = [0, 0.5, -0.5]
+        u_possibilities = [1, -1, 5, -5]
         return random.choice(u_possibilities, (np.shape(self.u_agents)))
 
     def same_configuration(self, q, V):
@@ -162,8 +163,8 @@ class Environment:
         found = False
         for i in range(len(V)):
             equal = True
-            for j in range(np.size(q.p)):
-                if q.p[j] != V[i][0].p[j]:
+            for j in range(len(q.p)):
+                if any(q.p[j] != V[i][0].p[j]):
                     equal = False
             if equal:
                 found = True
@@ -190,8 +191,8 @@ class Environment:
                     break
         path_q.reverse()
         u = []
-        for q in path_q:
-            u.append(q.u)
+        for q_id in path_q:
+            u.append(V[q_id].u)
         return u
 
 
@@ -219,7 +220,7 @@ class Environment:
         for n in range(N):
             Vkrand = self.sample_fv(Vk, max_t)
             u_new = self.sample_fu()
-            p_new = q_0.p + u_new * self.t
+            p_new = Vk[Vkrand][0].p + u_new * self.t
             if self.free_space(p_new):
                 for q_rand in Vk[Vkrand]:
                     x, sigma_new = self.apply_kalman_filter(q_rand.p, q_rand.sigma)

@@ -23,13 +23,15 @@ class Main(threading.Thread):
             self.environment.update()
             time.sleep(self.environment.t)
 
-env = Environment(100,100,0.01, False)
+env = Environment(100,100,0.01, True)
 
-for i in range(5):
+for i in range(1):
     env.add_target(np.random.random()*25-25, np.random.random()*25-25, 0.01, 0.01)
+    env.add_agent(np.random.random()*25-25, np.random.random()*25-25, 0.01, 0.01)
 
 main = Main(env)
 main.start()
+#main.run()
 plt.gcf()
 plt.show()
 main.join()
