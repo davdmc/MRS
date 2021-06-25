@@ -65,9 +65,13 @@ class Environment:
         self.u_targets = np.vstack((self.u_targets, (np.random.random((1,2))-0.5)*5))
         self.sigma_targets = np.vstack((self.sigma_targets, np.array([sigma_x, sigma_y])))
         self.n_targets += 1
-        self.x_estimated = np.vstack((np.array(self.x_estimated), x,y))
+        self.x_estimated.append(x)
+        self.x_estimated.append(y)
         sigma_aux = np.identity(len(self.sigma_estimated)+2)
-        np.fill_diagonal(sigma_aux, np.hstack(np.diag(sigma_aux), sigma_x, sigma_y))
+        if np.size(self.sigma_estimated) != 0:
+            sigma_aux[:np.shape(self.sigma_estimated)[0],:np.shape(self.sigma_estimated)[1]] = self.sigma_estimated
+        sigma_aux[-2, -2] = sigma_x
+        sigma_aux[-1, -1] = sigma_y
         self.sigma_estimated = sigma_aux
 
     def apply_kalman_filter(self, pos_q, sigma_in):
@@ -77,7 +81,7 @@ class Environment:
         # the measurement is proportional to the distance to the target.
         sigma = sigma_in
         x = self.x_estimated
-        for agent in len(self.n_agents):
+        for agent in range(self.n_agents):
             measurements_sigma = np.identity(self.n_targets*2)
             measurements_x = np.zeros(self.n_targets*2, 1)
             for target in range(self.n_targets):
@@ -89,9 +93,9 @@ class Environment:
                 measurements_x[2*target+1] = np.random.randn()*measurements_sigma[2*target+1, 2*target+1]
             y = measurements_x - x
             S = sigma + measurements_sigma
-            K = sigma@measurements_sigma
+            K = sigma@S
             x = x + K*y
-            sigma = (np.identity(len(K))-K) * self.sigma_estimated
+            sigma = (np.identity(len(K))-K) * sigma
         return x, sigma
 
     def update(self):
@@ -134,7 +138,7 @@ class Environment:
         sampling_vector = []
         for i in range(len(V)):
             found = False
-            for q in V(i):
+            for q in V[i]:
                 if q.t == max_t:
                     found = True
             sampling_vector.append(i)

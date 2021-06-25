@@ -23,7 +23,7 @@ class Main(threading.Thread):
             self.environment.update()
             time.sleep(self.environment.t)
 
-env = Environment(100,100,0.01, True)
+env = Environment(100,100,0.01, False)
 
 for i in range(5):
     env.add_target(np.random.random()*25-25, np.random.random()*25-25, 0.01, 0.01)
