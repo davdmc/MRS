@@ -8,7 +8,7 @@ from numpy.linalg.linalg import det
 #plt.rcParams["figure.figsize"] = (20,20)
 
 def sigma_measure(l):
-    return 0.0001 + l * 0.25
+    return 0.0001 + l**2 * 0.01
         
 class AIANode:
     def __init__(self, p, x_est, cov, reaching_motion):
@@ -119,7 +119,11 @@ class AIATree:
                 x_g.append(node)
 
         ## Find the minimum node cost
-        min_cost_node = x_g[1]
+        if(len(x_g) > 1):
+            min_cost_node = x_g[1]
+        else:
+            return -1
+
         #print("COST")
         for node in x_g:
             #print(np.linalg.det(node.cov))
@@ -194,7 +198,7 @@ class Environment:
         # Number of trials of the algorithm
         self.max_n = 20
         # Minimum node cost admissible as solution
-        self.delta = 0.001
+        self.delta = 0.0000001
 
         self.tree = None
 
@@ -332,18 +336,12 @@ class Environment:
         if(self.n_targets > 0):
             plt.scatter(self.xi[:,0], self.xi[:,1], 6, 'r', 'x')
 
-        if self.tree != None:
-            for nodes in self.tree.nodes:
-                plt.scatter(nodes.p[:,0], nodes.p[:,1], 1, 'y', 'x')
+        # if self.tree != None:
+        #     for nodes in self.tree.nodes:
+        #         plt.scatter(nodes.p[:,0], nodes.p[:,1], 1, 'y', 'x')
             
-            for edge in self.tree.edges:
-                print("Print")
-                print(edge[0].p[0])
-                print(edge[1].p[0])
-                print(edge[0].p[1])
-                print(edge[1].p[1])
-
-                plt.plot([edge[0].p[0], edge[1].p[0]], [edge[0].p[1], edge[1].p[1]], c='gray', linewidth=0.1)
+        #     for edge in self.tree.edges:
+        #         plt.plot([edge[0].p[0], edge[1].p[0]], [edge[0].p[1], edge[1].p[1]], c='gray', linewidth=0.1)
 
 def sampling_based_active_information_acquisition(max_n, environment, delta):
     # p: state of the robots (position in our case)
@@ -387,6 +385,8 @@ def sampling_based_active_information_acquisition(max_n, environment, delta):
                     
     # Get the sequence of actions to follow
     path = tree.get_min_path(delta)
+    if path == -1:
+        sampling_based_active_information_acquisition(max_n, environment, delta)
     # print(path)
     return path, tree
 
