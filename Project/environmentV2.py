@@ -5,8 +5,10 @@ from numpy import random
 from numpy.core.numeric import Inf
 from numpy.linalg.linalg import det
 
+#plt.rcParams["figure.figsize"] = (20,20)
+
 def sigma_measure(l):
-    return 0.0001 + l * 0.075
+    return 0.0001 + l * 0.25
         
 class AIANode:
     def __init__(self, p, x_est, cov, reaching_motion):
@@ -67,7 +69,7 @@ class AIATree:
             self.v_k[(child.p).tostring()] = [child]
 
 
-    def sample_fv(self, p_v = 0.7):
+    def sample_fv(self, p_v = 0.5):
         '''
             The sampling strategy is based on sec V.A: gives more priority to leaves
         '''
@@ -110,9 +112,17 @@ class AIATree:
         '''
             Searches the minimum cost node and gets the path to get to it
         '''
-        ## Find the minimum node cost
-        min_cost_node = self.nodes[1]
+        x_g = []
+        ## Find the possible nodes
         for node in self.nodes:
+            if np.linalg.det(node.cov) < delta:
+                x_g.append(node)
+
+        ## Find the minimum node cost
+        min_cost_node = x_g[1]
+        #print("COST")
+        for node in x_g:
+            #print(np.linalg.det(node.cov))
             if node.cost < min_cost_node.cost and node.timestamp!=0:
                 min_cost_node = node
 
@@ -182,9 +192,11 @@ class Environment:
 
         # PARAMETERS TO TUNE
         # Number of trials of the algorithm
-        self.max_n = 5
+        self.max_n = 20
         # Minimum node cost admissible as solution
-        self.delta = 0.18
+        self.delta = 0.001
+
+        self.tree = None
 
         # variables for metrics
         self.max_t = []
@@ -206,7 +218,7 @@ class Environment:
     
     def add_target(self, x, y, sigma_x, sigma_y):
         self.xi = np.vstack((self.xi, np.array([x,y])))
-        self.u_targets = np.vstack((self.u_targets, (np.random.random((1,2))-0.5)*5))
+        self.u_targets = np.vstack((self.u_targets, (np.random.random((1,2))-0.5)))
         self.sigma_targets = np.vstack((self.sigma_targets, np.array([sigma_x, sigma_y])))
         self.n_targets += 1
         # Add position estimated to the matrix
@@ -279,7 +291,7 @@ class Environment:
         # using the covariance of the measurements. Thus, the sampling of u is completely
         # random.
         # TODO: implement sensor range and on-the-fly target assignment
-        u_possibilities = [0.5, -0.5]
+        u_possibilities = [0.1, -0.1, 0.00001, -0.00001]
         return random.choice(u_possibilities, (np.shape(self.u_agents)))
 
     def get_measurements(self, pi):
@@ -316,12 +328,22 @@ class Environment:
         plt.xlim(-self.width/2, self.width/2)
         plt.ylim(-self.height/2, self.height/2)
         if(self.n_agents > 0):
-            plt.scatter(self.qi[:,0], self.qi[:,1], 4, 'b', 'o')
+            plt.scatter(self.qi[:,0], self.qi[:,1], 6, 'b', 'o')
         if(self.n_targets > 0):
-            plt.scatter(self.xi[:,0], self.xi[:,1], 4, 'r', 'x')
+            plt.scatter(self.xi[:,0], self.xi[:,1], 6, 'r', 'x')
 
-        # for nodes in self.tree.nodes:
-        #     plt.text(nodes.p[:,0], nodes.p[:,1], "{0:.3g}".format(nodes.cost))
+        if self.tree != None:
+            for nodes in self.tree.nodes:
+                plt.scatter(nodes.p[:,0], nodes.p[:,1], 1, 'y', 'x')
+            
+            for edge in self.tree.edges:
+                print("Print")
+                print(edge[0].p[0])
+                print(edge[1].p[0])
+                print(edge[0].p[1])
+                print(edge[1].p[1])
+
+                plt.plot([edge[0].p[0], edge[1].p[0]], [edge[0].p[1], edge[1].p[1]], c='gray', linewidth=0.1)
 
 def sampling_based_active_information_acquisition(max_n, environment, delta):
     # p: state of the robots (position in our case)
@@ -341,7 +363,7 @@ def sampling_based_active_information_acquisition(max_n, environment, delta):
     root = AIANode(environment.qi, x_est, P_est, np.zeros(environment.qi.shape))
     root.id = 0
     root.timestamp = 0
-    root.cov = P_est
+    root.cov = P_est * 100000
     root.cost = np.linalg.det(P_est)
 
     tree = AIATree(root)
