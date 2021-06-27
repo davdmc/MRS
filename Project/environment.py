@@ -250,7 +250,7 @@ class Environment:
         for n in range(N):
             Vkrand = self.sample_fv(Vk, max_t) # Sample a k (corresponds to a position of 1 or more nodes with the same configuration)
             u_new = self.sample_fu() # Sample an action
-            p_new = Vk[Vkrand][0].p + u_new * self.t # New position with that action
+            p_new = Vk[Vkrand][0].p + u_new # New position with that action
             if self.free_space(p_new):
                 for q_rand in Vk[Vkrand]: # Apply it for all the nodes with that configuration
                     x, sigma_new = self.apply_kalman_filter(q_rand.p, q_rand.sigma) # get uncertainity in the new configuration
