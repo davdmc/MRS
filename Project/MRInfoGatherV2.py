@@ -25,9 +25,10 @@ class Main(threading.Thread):
 
 env = Environment(100,100,0.01, True)
 
-for i in range(1):
+for i in range(2):
     env.add_target(np.random.random()*25-25, np.random.random()*25-25, 0.1, 0.1)
     env.add_agent(np.random.random()*25-25, np.random.random()*25-25, 0.1, 0.1)
+    # env.add_agent(np.random.random()*25-25, np.random.random()*25-25, 0.1, 0.1)
 
 main = Main(env)
 main.start()

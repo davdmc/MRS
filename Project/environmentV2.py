@@ -186,6 +186,10 @@ class Environment:
         # Minimum node cost admissible as solution
         self.delta = 0.18
 
+        # variables for metrics
+        self.max_t = []
+        self.length_path_chosen = []
+
         if visualize:
             # Configure plot
             plt.plot(0,0)
@@ -291,16 +295,18 @@ class Environment:
         R = np.zeros((self.n_agents, 2*self.n_targets))
         for j in range(self.n_agents):
             for i in range(self.n_targets):
+                # print(pi)
                 dist_x = pi[j,0] - self.xi[i,0]
                 dist_y = pi[j,1] - self.xi[i,1]
                 dist_l = np.sqrt(dist_x**2 + dist_y**2)
                 # Construct uncertainity of the current measurements, depending on the distance
                 sigma_x = sigma_measure(dist_l)
                 sigma_y = sigma_measure(dist_l)
-                z[i, 2*j] = self.xi[i,0] + np.random.random() * sigma_x
-                z[i, 2*j+1] = self.xi[i,1] + np.random.random() * sigma_y
-                R[i, 2*j] = sigma_x**2
-                R[i, 2*j+1] = sigma_y**2
+                # print(self.xi)
+                z[j, 2*i] = self.xi[i,0] + np.random.random() * sigma_x
+                z[j, 2*i+1] = self.xi[i,1] + np.random.random() * sigma_y
+                R[j, 2*i] = sigma_x**2
+                R[j, 2*i+1] = sigma_y**2
 
         return z, R
                 
@@ -343,15 +349,11 @@ def sampling_based_active_information_acquisition(max_n, environment, delta):
     for n in range(max_n):
         vk_rand = tree.sample_fv() # Sample a k (corresponds to a position of 1 or more nodes with the same configuration)
         u_new = environment.sample_fu() # Sample an action
-        p_new = vk_rand + u_new # New position with that action
+        p_new = np.reshape(vk_rand, np.shape(u_new)) + u_new # New position with that action
+        # print(vk_rand)
         if environment.free_space(p_new):
             for q_rand in tree.v_k[(vk_rand).tostring()]: # Apply it for all the nodes with that configuration
                 z, R = environment.get_measurements(p_new)
-                # DBUG-----------------------------------------------------------------
-                # dist_x = q_rand.p[j,0] - self.xi[i,0]
-                # dist_y = pi[j,1] - self.xi[i,1]
-                # dist_l = np.sqrt(dist_x**2 + dist_y**2)
-                # DBUG-----------------------------------------------------------------
                 x_est, P_est = kalman_predict(q_rand.x_est, q_rand.cov, environment.Q)
                 x_new, P_new = kalman_update(x_est, z[0,:], P_est, np.diag(R[0,:])) # get uncertainity in the new configuration
                 for robot in range(1,environment.n_agents):
