@@ -6,7 +6,7 @@ from numpy.core.numeric import Inf
 from numpy.linalg.linalg import det
 
 def sigma_measure(l):
-    return 0.1 + l * 0.075
+    return 0.0001 + l * 0.00075
         
 class AIANode:
     def __init__(self, p, x_est, cov, reaching_motion):
@@ -113,7 +113,7 @@ class AIATree:
         ## Find the minimum node cost
         min_cost_node = self.nodes[0]
         for node in self.nodes:
-            print(min_cost_node.reaching_motion)
+            print(node.cost)
             if node.cost < min_cost_node.cost:
                 min_cost_node = node
 
@@ -139,11 +139,15 @@ def kalman_filter(x_old, z, P_old, Q, R):
 
     # Update
     y = z - x_est
+
     K = P_est @ np.linalg.inv(R + H @ P_est @ H.T)
     x_new = x_est + K @ y
     tmp = K @ H
     P_new = (np.eye(tmp.shape[0]) - tmp) @ P_est
-
+    print("KALMAN")
+    print(y)
+    print(P_old)
+    print(P_new)
     return x_new, P_new
 
 class Environment:
@@ -159,8 +163,6 @@ class Environment:
         #self.sigma_agents = np.zeros((0,2)) No motion noise
         self.n_agents = 0
         self.u_agents = np.zeros((0,2))
-        # Measurement sigma
-        self.sigma_measure = 0.01
 
         # Real state values
         self.xi = np.zeros((0,2))
@@ -178,7 +180,7 @@ class Environment:
 
         # PARAMETERS TO TUNE
         # Number of trials of the algorithm
-        self.max_n = 5
+        self.max_n = 30
         # Minimum node cost admissible as solution
         self.delta = 0.18
 
@@ -274,7 +276,7 @@ class Environment:
         u_possibilities = [0.2, -0.2]
         return random.choice(u_possibilities, (np.shape(self.u_agents)))
 
-    def get_measurements(self):
+    def get_measurements(self, pi):
         '''
             Get the noisy position of the targets by each agent and stores it as follows:
             Row: Different agents
@@ -287,8 +289,8 @@ class Environment:
         R = np.zeros((self.n_agents, 2*self.n_targets))
         for j in range(self.n_agents):
             for i in range(self.n_targets):
-                dist_x = self.qi[j,0] - self.xi[i,0]
-                dist_y = self.qi[j,1] - self.xi[i,1]
+                dist_x = pi[j,0] - self.xi[i,0]
+                dist_y = pi[j,1] - self.xi[i,1]
                 dist_l = np.sqrt(dist_x**2 + dist_y**2)
                 # Construct uncertainity of the current measurements, depending on the distance
                 sigma_x = sigma_measure(dist_l)
@@ -338,13 +340,13 @@ def sampling_based_active_information_acquisition(max_n, environment, delta):
         p_new = vk_rand + u_new # New position with that action
         if environment.free_space(p_new):
             for q_rand in tree.v_k[(vk_rand).tostring()]: # Apply it for all the nodes with that configuration
-                z, R = environment.get_measurements()
+                z, R = environment.get_measurements(q_rand.p)
                 x_new, P_new = kalman_filter(q_rand.x_est, z[0,:], q_rand.cov, environment.Q, np.diag(R[0,:])) # get uncertainity in the new configuration
                 for robot in range(1,environment.n_agents):
                     x_new, P_new = kalman_filter(x_new, z[robot,:], P_new, environment.Q, np.diag(R[robot,:])) # get uncertainity in the new configuration
                    
                 q_new = AIANode(p_new, x_new, P_new, u_new) # create new node of the graph
-                print(q_new.reaching_motion)
+
                 tree.append_child(q_rand, q_new, np.linalg.det(P_new))
                     
     # Get the sequence of actions to follow
