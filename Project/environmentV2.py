@@ -6,7 +6,7 @@ from numpy.core.numeric import Inf
 from numpy.linalg.linalg import det
 
 def sigma_measure(l):
-    return 0.0001 + l * 0.00075
+    return 0.0001 + l * 0.075
         
 class AIANode:
     def __init__(self, p, x_est, cov, reaching_motion):
@@ -23,7 +23,7 @@ class AIANode:
 class AIATree:
     def __init__(self, root):
         assert root.id == 0 and root.timestamp == 0 and root.reaching_motion.all() != None and root.cost.all() != None, "Root not properly initialized"
-        root.cost = 0.01 #!!! Check what is sigma 0
+        #root.cost = 0 #!!! Check what is sigma 0
         self.nodes = [root] # Hold a reference to all the nodes
         self.edges = [] # Edges are stored as: from-to tuple of nodes. However, nodes are connected by the Node class.
         self.id_count = 1 # This id is incremented every time a new child is added
@@ -113,7 +113,6 @@ class AIATree:
         ## Find the minimum node cost
         min_cost_node = self.nodes[0]
         for node in self.nodes:
-            print(node.cost)
             if node.cost < min_cost_node.cost:
                 min_cost_node = node
 
@@ -123,8 +122,8 @@ class AIATree:
         while len(current_node.parents) != 0:
             current_node = current_node.parent
             path.append(current_node.reaching_motion)
-        
-        return path.reverse()
+        path.reverse()
+        return path
 
 def kalman_filter(x_old, z, P_old, Q, R):
     '''
@@ -144,10 +143,9 @@ def kalman_filter(x_old, z, P_old, Q, R):
     x_new = x_est + K @ y
     tmp = K @ H
     P_new = (np.eye(tmp.shape[0]) - tmp) @ P_est
-    print("KALMAN")
-    print(y)
-    print(P_old)
-    print(P_new)
+    # print("KALMAN")
+    # print(y)
+    # print(P_old[0,0] > P_new[0,0])
     return x_new, P_new
 
 class Environment:
@@ -236,9 +234,9 @@ class Environment:
         noise_targets = np.random.randn(self.xi.shape[0], self.xi.shape[1]) * self.sigma_targets
         self.xi += self.u_targets * self.t + noise_targets
 
-        z, R = self.get_measurements()
+        z, R = self.get_measurements(self.qi)
         self.x_est, self.P_est  = kalman_filter(self.x_est, z[0,:], self.P_est, self.Q, np.diag(R[0,:])) # get uncertainity in the new configuration
-        for robot in range(1,self.num_agents):
+        for robot in range(1,self.n_agents):
             self.x_est, self.P_est = kalman_filter(self.x_est, z[robot,:], self.P_est , self.Q, np.diag(R[robot,:])) # get uncertainity in the new configuration
                   
 
@@ -249,9 +247,7 @@ class Environment:
         if self.n_agents > 0:
             # If new execution or previous path has finished
             if (len(self.u_path) == 0):
-                print("Looking for new path")
                 self.u_path = sampling_based_active_information_acquisition(self.max_n, self, self.delta)
-                print(self.u_path)
             self.set_agents_command(self.u_path[0])
             self.u_path.pop(0)
 
@@ -330,6 +326,7 @@ def sampling_based_active_information_acquisition(max_n, environment, delta):
     root = AIANode(environment.qi, x_est, P_est, np.zeros(environment.qi.shape))
     root.id = 0
     root.timestamp = 0
+    root.cov = P_est
     root.cost = np.linalg.det(P_est)
 
     tree = AIATree(root)
