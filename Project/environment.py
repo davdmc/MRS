@@ -32,7 +32,7 @@ class Environment:
 
         # ROW: agent/target, COL: pos x pos y
         self.qi = np.zeros((0,2))
-        self.sigma_agents = np.zeros((0,2))
+        #self.sigma_agents = np.zeros((0,2)) No motion noise
         self.n_agents = 0
         self.u_agents = np.zeros((0,2))
         self.hist_qi = []
@@ -70,7 +70,6 @@ class Environment:
         # Add commands of action (0,0) for the new agent until the current sequence is finished
         for i in range(len(self.u_path)):
             self.u_path[i] = np.vstack((self.u_path[i], np.array([0,0])))
-        self.sigma_agents = np.vstack((self.sigma_agents, np.array([sigma_x, sigma_y])))
         self.n_agents += 1
     
     def add_target(self, x, y, sigma_x, sigma_y):
@@ -114,23 +113,25 @@ class Environment:
             # Apply the Kalman filter
             y = measurements_x - x
             S = sigma + measurements_sigma
-            K = sigma@S
+            K = sigma@np.linalg.inv(S)
             x = x + K*y
             sigma = (np.identity(len(K))-K) * sigma
         return x, sigma
 
     def update(self):
+        '''
+            Update the environment dynamics (agents and state)
+        '''
+        # Update agents according to Eq(1)
         self.hist_qi.append(self.qi)
         if self.n_agents > 0:
             # If new execution or previous path has finished
             if (len(self.u_path) == 0):
-                print("New path")
                 self.u_path = self.sampling_based_active_information_acquisition()
             self.set_agents_command(self.u_path[0])
             self.u_path.pop(0)
-        noise_agents = np.random.randn(self.qi.shape[0], self.qi.shape[1]) * self.sigma_agents
-        self.qi += self.u_agents * self.t + noise_agents
-    
+        self.qi += self.u_agents #* self.t
+        # Update state (targets) according to Eq(2)
         self.hist_xi.append(self.xi)
         noise_targets = np.random.randn(self.xi.shape[0], self.xi.shape[1]) * self.sigma_targets
         self.xi += self.u_targets * self.t + noise_targets
@@ -181,7 +182,7 @@ class Environment:
         # use an infinite sensor range, and the np.size(V[i])preferred final u will be always selected
         # using the covariance of the measurements. Thus, the sampling of u is completely
         # random.
-        u_possibilities = [10, -10]
+        u_possibilities = [0.2, -0.2]
         return random.choice(u_possibilities, (np.shape(self.u_agents)))
 
     def same_configuration(self, q, V):
