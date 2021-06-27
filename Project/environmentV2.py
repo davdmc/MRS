@@ -111,19 +111,19 @@ class AIATree:
             Searches the minimum cost node and gets the path to get to it
         '''
         ## Find the minimum node cost
-        min_cost_node = self.nodes[0]
+        min_cost_node = self.nodes[1]
         for node in self.nodes:
-            if node.cost < min_cost_node.cost:
+            if node.cost < min_cost_node.cost and node.timestamp!=0:
                 min_cost_node = node
 
         ## Get the path from that node to the root and reverse it
         path = [min_cost_node.reaching_motion]
         current_node = min_cost_node
         while len(current_node.parents) != 0:
-            current_node = current_node.parent
+            current_node = current_node.parents[0]
             path.append(current_node.reaching_motion)
         path.reverse()
-        return path
+        return path[1:]
 
 def kalman_predict(x_old, P_old, Q):
     '''
@@ -254,6 +254,7 @@ class Environment:
             if (len(self.u_path) == 0):
                 self.u_path, self.tree = sampling_based_active_information_acquisition(self.max_n, self, self.delta)
             self.set_agents_command(self.u_path[0])
+            # print(self.u_path[0])
             self.u_path.pop(0)
 
     def set_agents_command(self, u_agents):
@@ -274,7 +275,7 @@ class Environment:
         # using the covariance of the measurements. Thus, the sampling of u is completely
         # random.
         # TODO: implement sensor range and on-the-fly target assignment
-        u_possibilities = [2, -2]
+        u_possibilities = [0.5, -0.5]
         return random.choice(u_possibilities, (np.shape(self.u_agents)))
 
     def get_measurements(self, pi):
@@ -313,8 +314,8 @@ class Environment:
         if(self.n_targets > 0):
             plt.scatter(self.xi[:,0], self.xi[:,1], 4, 'r', 'x')
 
-        for nodes in self.tree.nodes:
-            plt.text(nodes.p[:,0], nodes.p[:,1], "{0:.3g}".format(nodes.cost))
+        # for nodes in self.tree.nodes:
+        #     plt.text(nodes.p[:,0], nodes.p[:,1], "{0:.3g}".format(nodes.cost))
 
 def sampling_based_active_information_acquisition(max_n, environment, delta):
     # p: state of the robots (position in our case)
@@ -345,7 +346,12 @@ def sampling_based_active_information_acquisition(max_n, environment, delta):
         p_new = vk_rand + u_new # New position with that action
         if environment.free_space(p_new):
             for q_rand in tree.v_k[(vk_rand).tostring()]: # Apply it for all the nodes with that configuration
-                z, R = environment.get_measurements(q_rand.p)
+                z, R = environment.get_measurements(p_new)
+                # DBUG-----------------------------------------------------------------
+                # dist_x = q_rand.p[j,0] - self.xi[i,0]
+                # dist_y = pi[j,1] - self.xi[i,1]
+                # dist_l = np.sqrt(dist_x**2 + dist_y**2)
+                # DBUG-----------------------------------------------------------------
                 x_est, P_est = kalman_predict(q_rand.x_est, q_rand.cov, environment.Q)
                 x_new, P_new = kalman_update(x_est, z[0,:], P_est, np.diag(R[0,:])) # get uncertainity in the new configuration
                 for robot in range(1,environment.n_agents):
@@ -357,6 +363,7 @@ def sampling_based_active_information_acquisition(max_n, environment, delta):
                     
     # Get the sequence of actions to follow
     path = tree.get_min_path(delta)
+    # print(path)
     return path, tree
 
    
