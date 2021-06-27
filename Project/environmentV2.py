@@ -125,16 +125,20 @@ class AIATree:
         path.reverse()
         return path
 
-def kalman_filter(x_old, z, P_old, Q, R):
+def kalman_predict(x_old, P_old, Q):
     '''
-        Apply the kalman filter with an unknown state transitions (no velocities known from moving targets)
-        and a noisy observation model that returns the position from every target: z = I x + w -> H = I
+        Apply the kalman filter predict with an unknown state transitions (no velocities known from moving targets)
     '''
-    H = np.eye(len(x_old))
-
-    # Predict
     x_est = x_old
     P_est = P_old + Q
+    return x_est, P_est
+
+def kalman_update(x_est, z, P_est, R):
+    '''
+        Apply the kalman filter update with noisy observation model that returns the position from every target: 
+        z = I x + w -> H = I
+    '''
+    H = np.eye(len(x_est))
 
     # Update
     y = z - x_est
@@ -178,7 +182,7 @@ class Environment:
 
         # PARAMETERS TO TUNE
         # Number of trials of the algorithm
-        self.max_n = 30
+        self.max_n = 5
         # Minimum node cost admissible as solution
         self.delta = 0.18
 
@@ -235,9 +239,10 @@ class Environment:
         self.xi += self.u_targets * self.t + noise_targets
 
         z, R = self.get_measurements(self.qi)
-        self.x_est, self.P_est  = kalman_filter(self.x_est, z[0,:], self.P_est, self.Q, np.diag(R[0,:])) # get uncertainity in the new configuration
+        x_est, P_est = kalman_predict(self.x_est, self.P_est, self.Q)
+        self.x_est, self.P_est  = kalman_update(x_est, z[0,:], P_est, np.diag(R[0,:])) # get uncertainity in the new configuration
         for robot in range(1,self.n_agents):
-            self.x_est, self.P_est = kalman_filter(self.x_est, z[robot,:], self.P_est , self.Q, np.diag(R[robot,:])) # get uncertainity in the new configuration
+            self.x_est, self.P_est = kalman_update(x_est, z[robot,:], P_est , np.diag(R[robot,:])) # get uncertainity in the new configuration
                   
 
     def update_agents_command(self):
@@ -247,7 +252,7 @@ class Environment:
         if self.n_agents > 0:
             # If new execution or previous path has finished
             if (len(self.u_path) == 0):
-                self.u_path = sampling_based_active_information_acquisition(self.max_n, self, self.delta)
+                self.u_path, self.tree = sampling_based_active_information_acquisition(self.max_n, self, self.delta)
             self.set_agents_command(self.u_path[0])
             self.u_path.pop(0)
 
@@ -269,7 +274,7 @@ class Environment:
         # using the covariance of the measurements. Thus, the sampling of u is completely
         # random.
         # TODO: implement sensor range and on-the-fly target assignment
-        u_possibilities = [0.2, -0.2]
+        u_possibilities = [2, -2]
         return random.choice(u_possibilities, (np.shape(self.u_agents)))
 
     def get_measurements(self, pi):
@@ -308,6 +313,9 @@ class Environment:
         if(self.n_targets > 0):
             plt.scatter(self.xi[:,0], self.xi[:,1], 4, 'r', 'x')
 
+        for nodes in self.tree.nodes:
+            plt.text(nodes.p[:,0], nodes.p[:,1], "{0:.3g}".format(nodes.cost))
+
 def sampling_based_active_information_acquisition(max_n, environment, delta):
     # p: state of the robots (position in our case)
     # u: control of the robots
@@ -338,9 +346,10 @@ def sampling_based_active_information_acquisition(max_n, environment, delta):
         if environment.free_space(p_new):
             for q_rand in tree.v_k[(vk_rand).tostring()]: # Apply it for all the nodes with that configuration
                 z, R = environment.get_measurements(q_rand.p)
-                x_new, P_new = kalman_filter(q_rand.x_est, z[0,:], q_rand.cov, environment.Q, np.diag(R[0,:])) # get uncertainity in the new configuration
+                x_est, P_est = kalman_predict(q_rand.x_est, q_rand.cov, environment.Q)
+                x_new, P_new = kalman_update(x_est, z[0,:], P_est, np.diag(R[0,:])) # get uncertainity in the new configuration
                 for robot in range(1,environment.n_agents):
-                    x_new, P_new = kalman_filter(x_new, z[robot,:], P_new, environment.Q, np.diag(R[robot,:])) # get uncertainity in the new configuration
+                    x_new, P_new = kalman_update(x_new, z[robot,:], P_new, np.diag(R[robot,:])) # get uncertainity in the new configuration
                    
                 q_new = AIANode(p_new, x_new, P_new, u_new) # create new node of the graph
 
@@ -348,6 +357,6 @@ def sampling_based_active_information_acquisition(max_n, environment, delta):
                     
     # Get the sequence of actions to follow
     path = tree.get_min_path(delta)
-    return path
+    return path, tree
 
    
