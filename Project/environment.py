@@ -36,7 +36,8 @@ class Environment:
         # Secuence of actions to perform
         self.u_path = []
 
-        # PARAMETERS TO TUNE
+        ##############################################################################
+        ### PARAMETERS TO TUNE
         # Number of trials of the algorithm
         self.max_n = 50
         # Minimum node cost admissible as solution
@@ -44,7 +45,9 @@ class Environment:
         # Max and min velocities for the agents: define the motion primitives
         self.max_vel = 0.1
         self.min_vel = 0.0001
-
+        ## COVARIANCES from: targets (process noise) and measure (function in utils)
+        ##############################################################################
+        
         self.tree = None
 
         # variables for metrics
