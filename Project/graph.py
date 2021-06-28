@@ -134,10 +134,14 @@ class AIATree:
             - delta: minimum threshold required to obtain a solution not being the minimal cost but that is valid (eq. 5b)
         '''
         x_g = []
+        min_node_cost_delta = 10000
         ## Find the possible nodes
         for node in self.nodes:
-            if np.linalg.det(node.cov) < delta:
+            node_cost = np.linalg.det(node.cov)
+            if node_cost < delta:
                 x_g.append(node)
+                if node_cost < min_node_cost_delta:
+                    min_node_cost_delta = node_cost
 
         ## Find the minimum node cost if there is any possible node. If not, repeat AIA tree construction
         if(len(x_g) > 1):
@@ -156,5 +160,5 @@ class AIATree:
             path.append(current_node.reaching_motion)
         path.reverse()
 
-        print("Length: {}, Cost: {}".format(len(path), min_cost_node.cost))
-        return path[1:]
+        #print("Length: {}, Cost: {}".format(len(path), min_cost_node.cost))
+        return path[1:], min_node_cost_delta

@@ -1,3 +1,4 @@
+from time import sleep
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -41,13 +42,14 @@ class Environment:
         # Number of trials of the algorithm
         self.max_n = 50
         # Minimum node cost admissible as solution
-        self.delta = 1.8e-6
+        self.delta = 1.8e-11
         # Max and min velocities for the agents: define the motion primitives
         self.max_vel = 0.1
-        self.min_vel = 0.0001
+        self.min_vel = 0.000001
         ## COVARIANCES from: targets (process noise) and measure (function in utils)
+        ## P_v in sample_pv function in graph.py
         ##############################################################################
-        
+
         self.tree = None
 
         # variables for metrics
@@ -111,7 +113,7 @@ class Environment:
         self.x_est, self.P_est  = kalman_update(x_est, z[0,:], P_est, np.diag(R[0,:])) # get uncertainity in the new configuration
         for robot in range(1,self.n_agents):
             self.x_est, self.P_est = kalman_update(x_est, z[robot,:], P_est , np.diag(R[robot,:])) # get uncertainity in the new configuration
-                  
+        sleep(1)
 
     def update_agents_command(self):
         '''
@@ -122,7 +124,6 @@ class Environment:
             if (len(self.u_path) == 0):
                 self.u_path, self.tree = sampling_based_active_information_acquisition(self.max_n, self, self.delta)
             self.set_agents_command(self.u_path[0])
-            # print(self.u_path[0])
             self.u_path.pop(0)
 
     def set_agents_command(self, u_agents):
@@ -159,14 +160,12 @@ class Environment:
         R = np.zeros((self.n_agents, 2*self.n_targets))
         for j in range(self.n_agents):
             for i in range(self.n_targets):
-                # print(pi)
                 dist_x = pi[j,0] - self.xi[i,0]
                 dist_y = pi[j,1] - self.xi[i,1]
                 dist_l = np.sqrt(dist_x**2 + dist_y**2)
                 # Construct uncertainity of the current measurements, depending on the distance
                 sigma_x = sigma_measure(dist_l)
                 sigma_y = sigma_measure(dist_l)
-                # print(self.xi)
                 z[j, 2*i] = self.xi[i,0] + np.random.random() * sigma_x
                 z[j, 2*i+1] = self.xi[i,1] + np.random.random() * sigma_y
                 R[j, 2*i] = sigma_x**2
@@ -184,11 +183,16 @@ class Environment:
         if(self.n_targets > 0):
             plt.scatter(self.xi[:,0], self.xi[:,1], 24, 'r', 'x')
 
-        # if self.tree != None:
-        #     for nodes in self.tree.nodes:
-        #         plt.scatter(nodes.p[:,0], nodes.p[:,1], 1, 'y', 'x')
+        if self.tree != None:
+            for nodes in self.tree.nodes:
+                plt.scatter(nodes.p[:,0], nodes.p[:,1], 1, c='orange', marker='x')
+            data = []
+            for edge in self.tree.edges:
+                for j in range(self.n_agents):
+                    data.append((edge[0].p[j,0], edge[1].p[j,0]))
+                    data.append((edge[0].p[j,1], edge[1].p[j,1]))
+                    data.append('gray')
             
-        #     for edge in self.tree.edges:
-        #         plt.plot([edge[0].p[0], edge[1].p[0]], [edge[0].p[1], edge[1].p[1]], c='gray', linewidth=0.1)
+            plt.plot(*data, linewidth=0.5)
 
    
