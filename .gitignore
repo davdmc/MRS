@@ -8,5 +8,6 @@ logs
 *.mp4
 *.pdf
 *.dat
+*.npy
 report/
 __pycache__
