@@ -2,6 +2,7 @@ from time import sleep
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+import time
 
 from graph import AIANode, AIATree
 from utils import sigma_measure, kalman_predict, kalman_update
@@ -42,7 +43,7 @@ class Environment:
         # Number of trials of the algorithm
         self.max_n = 50
         # Minimum node cost admissible as solution
-        self.delta = 1.8e-11
+        self.delta = 1.8e-15
         # Max and min velocities for the agents: define the motion primitives
         self.max_vel = 0.1
         self.min_vel = 0.000001
@@ -53,8 +54,14 @@ class Environment:
         self.tree = None
 
         # variables for metrics
-        self.max_t = []
         self.length_path_chosen = []
+        self.cost_node = []
+        self.det_covariance = []
+        self.time = []
+        self.error_pos = []
+
+        # Sequence number for output storage
+        self.num_img = 0
 
         if visualize:
             # Configure plot
@@ -112,7 +119,12 @@ class Environment:
         x_est, P_est = kalman_predict(self.x_est, self.P_est, self.Q)
         self.x_est, self.P_est  = kalman_update(x_est, z[0,:], P_est, np.diag(R[0,:])) # get uncertainity in the new configuration
         for robot in range(1,self.n_agents):
-            self.x_est, self.P_est = kalman_update(x_est, z[robot,:], P_est , np.diag(R[robot,:])) # get uncertainity in the new configuration
+            self.x_est, self.P_est = kalman_update(self.x_est, z[robot,:], self.P_est , np.diag(R[robot,:])) # get uncertainity in the new configuration
+        self.det_covariance.append(np.linalg.det(self.P_est))
+        np.save("output/det_covariance", self.det_covariance)
+        error_estimation = np.mean((self.xi - np.reshape(x_est, np.shape(self.xi)))**2)
+        self.error_pos.append(error_estimation)
+        np.save("output/error_pos", self.error_pos)
         sleep(1)
 
     def update_agents_command(self):
@@ -123,6 +135,8 @@ class Environment:
             # If new execution or previous path has finished
             if (len(self.u_path) == 0):
                 self.u_path, self.tree = sampling_based_active_information_acquisition(self.max_n, self, self.delta)
+                self.length_path_chosen.append(len(self.u_path))
+                np.save("output/length_path_chosen", self.length_path_chosen)
             self.set_agents_command(self.u_path[0])
             self.u_path.pop(0)
 
@@ -194,5 +208,7 @@ class Environment:
                     data.append('gray')
             
             plt.plot(*data, linewidth=0.5)
+        plt.savefig("output/" + "MRS" + ("000000" + str(self.num_img))[-5:] + ".png")
+        self.num_img = self.num_img + 1
 
    

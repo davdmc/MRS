@@ -4,7 +4,7 @@ def sigma_measure(l):
     '''
         Non-linear sigma measure to model distance variant sensor noise
     '''
-    return 0.0001 + l**2 * 0.01
+    return 0.0001 + l**5 * 0.01
 
 def kalman_predict(x_old, P_old, Q):
     '''

@@ -144,10 +144,11 @@ class AIATree:
                     min_node_cost_delta = node_cost
 
         ## Find the minimum node cost if there is any possible node. If not, repeat AIA tree construction
+        # print(x_g)
         if(len(x_g) > 1):
             min_cost_node = x_g[1]
         else:
-            return -1
+            return -1, min_node_cost_delta
         for node in x_g:
             if node.cost < min_cost_node.cost and node.timestamp!=0:
                 min_cost_node = node
@@ -162,3 +163,4 @@ class AIATree:
 
         #print("Length: {}, Cost: {}".format(len(path), min_cost_node.cost))
         return path[1:], min_node_cost_delta
+        # return [0,0], 1

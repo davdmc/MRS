@@ -2,15 +2,18 @@ import numpy as np
 
 from graph import AIANode, AIATree
 from utils import kalman_predict, kalman_update
+import datetime
 
-def sampling_based_active_information_acquisition(max_n, environment, delta):
+
+def sampling_based_active_information_acquisition(max_n, environment, delta_in):
     '''
         Sampling-based Active Information Filter
     '''
     path = -1
     min_node_cost = 10000
+    delta = delta_in
     while path==-1:
-        print("Starting execution. Last node cost: {}".format(min_node_cost))
+        start = datetime.datetime.now()
         x_est = environment.x_est
         P_est = environment.P_est
 
@@ -41,5 +44,11 @@ def sampling_based_active_information_acquisition(max_n, environment, delta):
                         
         # Get the sequence of actions to follow
         path, min_node_cost = tree.get_min_path(delta)
-
+        environment.cost_node.append(min_node_cost)
+        np.save("output/cost_node", environment.cost_node)
+        delta = delta * 2
+        end = datetime.datetime.now()
+    interval = end-start
+    environment.time.append(interval.total_seconds())
+    np.save("output/time", environment.time)
     return path, tree
